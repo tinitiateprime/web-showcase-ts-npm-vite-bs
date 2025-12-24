@@ -18,15 +18,14 @@ import Comparison from "./pages/Comparison";
 import Comparison1 from "./pages/Comparison1";
 import Comparison2 from "./pages/Comparison2";
 
-// ⚠️ IMPORTANT: match the filename casing exactly on disk
-// If your file is src/pages/ForgotPassword.tsx then import must be:
+// ✅ IMPORTANT: matches your actual file name exactly (case-sensitive on Netlify)
 import ForgotPassword from "./pages/ForgotPassword";
 
 import Profile from "./pages/Profile";
 import EditProfile from "./pages/EditProfile";
 import Dashboard from "./pages/Dashboard";
 
-// ✅ Default import (because DashboardAnalytics.tsx has export default)
+// ✅ Default import (DashboardAnalytics.tsx has export default)
 import DashboardAnalytics from "./pages/DashboardAnalytics";
 
 import DashboardReports from "./pages/DashboardReports";
@@ -128,4 +127,3 @@ const App = () => {
 };
 
 export default App;
- 
