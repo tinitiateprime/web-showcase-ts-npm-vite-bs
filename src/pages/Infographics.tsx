@@ -1,35 +1,17 @@
-import React, { useState } from "react";
-import {
-  Container,
-  Row,
-  Col,
-  Card,
-  Badge,
-  ProgressBar,
-  Button,
-  ButtonGroup,
-  ToggleButton,
-} from "react-bootstrap";
+import { useState } from "react";
+import { Container, Row, Col, Card, Badge, ProgressBar, Button, ButtonGroup, ToggleButton } from "react-bootstrap";
 import { Pie, Bar } from "react-chartjs-2";
-import {
-  Chart as ChartJS,
-  ArcElement,
-  Tooltip,
-  Legend,
-  CategoryScale,
-  BarElement,
-  LinearScale,
-} from "chart.js";
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, BarElement, LinearScale } from "chart.js";
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, BarElement, LinearScale);
 
-const Infographics = () => {
-  // State
-  const [timeframe, setTimeframe] = useState("month");
-  const [darkMode, setDarkMode] = useState(false);
+type Timeframe = "week" | "month" | "year";
 
-  // Dynamic Chart Data based on timeframe
-  const barDataMap = {
+export default function Infographics() {
+  const [timeframe, setTimeframe] = useState<Timeframe>("month");
+  const [darkMode, setDarkMode] = useState<boolean>(false);
+
+  const barDataMap: Record<Timeframe, number[]> = {
     week: [5, 10, 7, 6],
     month: [10, 30, 20, 40],
     year: [100, 150, 120, 180],
@@ -60,19 +42,18 @@ const Infographics = () => {
   const darkClass = darkMode ? "bg-dark text-light" : "bg-light text-dark";
 
   return (
-    <div className={`${darkMode ? "bg-dark text-light" : "bg-light text-dark"}`} style={{ minHeight: "100vh", padding: "30px 0" }}>
+    <div className={darkClass} style={{ minHeight: "100vh", padding: "30px 0" }}>
       <Container fluid>
         <div className="d-flex justify-content-between align-items-center mb-4 px-3">
           <h2 className="fw-bold">📊 Advanced Business Dashboard</h2>
-          <Button variant={darkMode ? "light" : "dark"} onClick={() => setDarkMode(!darkMode)}>
+          <Button variant={darkMode ? "light" : "dark"} onClick={() => setDarkMode((p) => !p)}>
             {darkMode ? "☀ Light Mode" : "🌙 Dark Mode"}
           </Button>
         </div>
 
-        {/* Timeframe Toggle */}
         <div className="d-flex justify-content-center mb-4">
           <ButtonGroup>
-            {["week", "month", "year"].map((val) => (
+            {(["week", "month", "year"] as const).map((val) => (
               <ToggleButton
                 key={val}
                 id={`radio-${val}`}
@@ -81,7 +62,7 @@ const Infographics = () => {
                 name="radio"
                 value={val}
                 checked={timeframe === val}
-                onChange={(e) => setTimeframe(e.currentTarget.value)}
+                onChange={(e) => setTimeframe(e.currentTarget.value as Timeframe)}
               >
                 {val.charAt(0).toUpperCase() + val.slice(1)}
               </ToggleButton>
@@ -89,7 +70,6 @@ const Infographics = () => {
           </ButtonGroup>
         </div>
 
-        {/* Stats Cards */}
         <Row className="mb-4 g-4">
           {[
             { title: "👥 Users", value: "23,480", badge: "active" },
@@ -111,7 +91,6 @@ const Infographics = () => {
           ))}
         </Row>
 
-        {/* Charts */}
         <Row className="g-4">
           <Col md={6}>
             <Card className={`shadow-lg border-0 ${darkClass}`}>
@@ -135,13 +114,12 @@ const Infographics = () => {
           </Col>
         </Row>
 
-        {/* Progress Bars */}
         <Row className="mt-5 g-4">
           <Col md={4}>
             <Card className={`shadow border-0 ${darkClass}`}>
               <Card.Body>
                 <h6>🚀 Project Completion</h6>
-                <ProgressBar now={85} label={`85%`} striped variant="success" />
+                <ProgressBar now={85} label="85%" striped variant="success" />
               </Card.Body>
             </Card>
           </Col>
@@ -149,7 +127,7 @@ const Infographics = () => {
             <Card className={`shadow border-0 ${darkClass}`}>
               <Card.Body>
                 <h6>🧠 Productivity</h6>
-                <ProgressBar now={68} label={`68%`} striped variant="info" />
+                <ProgressBar now={68} label="68%" striped variant="info" />
               </Card.Body>
             </Card>
           </Col>
@@ -157,7 +135,7 @@ const Infographics = () => {
             <Card className={`shadow border-0 ${darkClass}`}>
               <Card.Body>
                 <h6>📞 Support Quality</h6>
-                <ProgressBar now={95} label={`95%`} striped variant="warning" />
+                <ProgressBar now={95} label="95%" striped variant="warning" />
               </Card.Body>
             </Card>
           </Col>
@@ -165,6 +143,4 @@ const Infographics = () => {
       </Container>
     </div>
   );
-};
-
-export default Infographics;
+}

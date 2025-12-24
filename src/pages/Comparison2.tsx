@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import {
   FaCheckCircle,
   FaTimesCircle,
@@ -8,7 +8,13 @@ import {
 } from "react-icons/fa";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-const features = [
+type FeatureRow = {
+  feature: string;
+  productA: boolean;
+  productB: boolean;
+};
+
+const features: FeatureRow[] = [
   { feature: "Speed Optimization", productA: true, productB: false },
   { feature: "AI Integration", productA: true, productB: true },
   { feature: "Multi-language Support", productA: false, productB: true },
@@ -19,8 +25,8 @@ const features = [
 const Comparison2 = () => {
   // Add animated background on mount
   useEffect(() => {
-    const style = document.createElement("style");
-    style.innerHTML = `
+    const styleEl = document.createElement("style");
+    styleEl.innerHTML = `
       body {
         background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
         background-size: 400% 400%;
@@ -33,11 +39,15 @@ const Comparison2 = () => {
         100% { background-position: 0% 50%; }
       }
     `;
-    document.head.appendChild(style);
-    return () => document.head.removeChild(style);
+    document.head.appendChild(styleEl);
+
+    // ✅ IMPORTANT: cleanup returns void (not styleEl)
+    return () => {
+      document.head.removeChild(styleEl);
+    };
   }, []);
 
-  const glassStyle = {
+  const glassStyle: React.CSSProperties = {
     background: "rgba(255,255,255,0.08)",
     backdropFilter: "blur(10px)",
     borderRadius: "10px",
@@ -46,20 +56,26 @@ const Comparison2 = () => {
     transition: "transform 0.3s ease, box-shadow 0.3s ease",
   };
 
-  const hoverStyle = {
+  const hoverStyle: React.CSSProperties = {
     transform: "translateY(-5px)",
     boxShadow: "0 10px 20px rgba(0,0,0,0.3)",
+  };
+
+  const handleEnter = (e: React.MouseEvent<HTMLDivElement>) => {
+    Object.assign(e.currentTarget.style, hoverStyle);
+  };
+
+  const handleLeave = (e: React.MouseEvent<HTMLDivElement>) => {
+    Object.assign(e.currentTarget.style, {
+      transform: "none",
+      boxShadow: "none",
+    });
   };
 
   return (
     <div className="container mt-5 text-white">
       {/* Header */}
-      <div
-        className="p-4 rounded mb-4 shadow-lg"
-        style={{
-          ...glassStyle,
-        }}
-      >
+      <div className="p-4 rounded mb-4 shadow-lg" style={glassStyle}>
         <h2 className="mb-1">
           <FaRocket className="me-2 text-warning" />
           Advanced Feature Comparison
@@ -72,11 +88,9 @@ const Comparison2 = () => {
         <div className="col-md-6 mb-3">
           <div
             className="card h-100 shadow border-primary"
-            style={{ ...glassStyle }}
-            onMouseEnter={(e) => Object.assign(e.currentTarget.style, hoverStyle)}
-            onMouseLeave={(e) =>
-              Object.assign(e.currentTarget.style, { transform: "none", boxShadow: "none" })
-            }
+            style={glassStyle}
+            onMouseEnter={handleEnter}
+            onMouseLeave={handleLeave}
           >
             <div className="card-header bg-primary text-white">
               <h5 className="mb-0">
@@ -100,11 +114,9 @@ const Comparison2 = () => {
         <div className="col-md-6 mb-3">
           <div
             className="card h-100 shadow border-success"
-            style={{ ...glassStyle }}
-            onMouseEnter={(e) => Object.assign(e.currentTarget.style, hoverStyle)}
-            onMouseLeave={(e) =>
-              Object.assign(e.currentTarget.style, { transform: "none", boxShadow: "none" })
-            }
+            style={glassStyle}
+            onMouseEnter={handleEnter}
+            onMouseLeave={handleLeave}
           >
             <div className="card-header bg-success text-white">
               <h5 className="mb-0">
@@ -127,7 +139,7 @@ const Comparison2 = () => {
       </div>
 
       {/* Comparison Table */}
-      <div className="table-responsive shadow rounded" style={{ ...glassStyle }}>
+      <div className="table-responsive shadow rounded" style={glassStyle}>
         <table className="table table-striped table-bordered text-center mb-0">
           <thead className="table-dark">
             <tr>

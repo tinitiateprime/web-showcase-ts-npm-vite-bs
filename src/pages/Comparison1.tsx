@@ -3,13 +3,29 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import "bootstrap/dist/css/bootstrap.min.css";
 
+type Product = {
+  id: number;
+  name: string;
+  specs: string;
+  price: string | number;
+  image: string;
+};
+
+const safeParse = <T,>(value: string | null, fallback: T): T => {
+  try {
+    return value ? (JSON.parse(value) as T) : fallback;
+  } catch {
+    return fallback;
+  }
+};
+
 const Comparison1 = () => {
-  const [selectedProducts, setSelectedProducts] = useState([]);
+  const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const allProducts = JSON.parse(localStorage.getItem("products") || "[]");
-    const selectedIds = JSON.parse(localStorage.getItem("selectedIds") || "[]");
+    const allProducts = safeParse<Product[]>(localStorage.getItem("products"), []);
+    const selectedIds = safeParse<number[]>(localStorage.getItem("selectedIds"), []);
     const filtered = allProducts.filter((p) => selectedIds.includes(p.id));
     setSelectedProducts(filtered);
   }, []);
@@ -45,6 +61,7 @@ const Comparison1 = () => {
       }}
     >
       <h1 className="text-center fw-bold mb-4">Selected Product Comparison</h1>
+
       <div className="row g-4">
         {selectedProducts.map((product) => (
           <motion.div
@@ -75,6 +92,7 @@ const Comparison1 = () => {
               >
                 {product.name}
               </div>
+
               <div className="card-body text-center">
                 <img
                   src={product.image}
@@ -85,7 +103,9 @@ const Comparison1 = () => {
                     marginBottom: "1rem",
                   }}
                 />
+
                 <h5>{product.specs}</h5>
+
                 <div
                   style={{
                     color: "#0f0",
@@ -94,9 +114,10 @@ const Comparison1 = () => {
                     marginTop: "0.5rem",
                   }}
                 >
-                  {product.price}
+                  {typeof product.price === "number" ? `$${product.price}` : product.price}
                 </div>
               </div>
+
               <div className="card-footer text-center bg-transparent border-0">
                 <motion.button
                   whileHover={{
@@ -121,6 +142,7 @@ const Comparison1 = () => {
           </motion.div>
         ))}
       </div>
+
       <div className="text-center mt-4">
         <button
           onClick={() => navigate("/")}

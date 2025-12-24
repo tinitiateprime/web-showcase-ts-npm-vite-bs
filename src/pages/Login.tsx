@@ -1,257 +1,377 @@
-import { useState } from "react";
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
+import {
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  ArrowRight,
+  Github,
+  Chrome,
+  Sparkles,
+  User,
+  Shield,
+  Zap,
+} from "lucide-react";
 
-const Login = () => {
-  const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+type Theme = {
+  name: string;
+  primary: string;
+  secondary: string;
+  accent: string;
+  gradient: string;
+  bgGradient: string;
+};
+
+type AuthFormData = {
+  email: string;
+  password: string;
+  confirmPassword: string;
+  name: string;
+};
+
+export default function LoginPage() {
+  const [currentTheme, setCurrentTheme] = useState<number>(0);
+  const [animationKey, setAnimationKey] = useState<number>(0);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [isLogin, setIsLogin] = useState<boolean>(true);
+  const [activeInput, setActiveInput] = useState<keyof AuthFormData | "">("");
+
+  const [formData, setFormData] = useState<AuthFormData>({
+    email: "",
+    password: "",
+    confirmPassword: "",
+    name: "",
   });
 
-  const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+  const themes: Theme[] = [
+    {
+      name: "Cyber Purple",
+      primary: "#8B5CF6",
+      secondary: "#A855F7",
+      accent: "#C084FC",
+      gradient: "linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%)",
+      bgGradient: "linear-gradient(45deg, #8B5CF6 0%, #EC4899 100%)",
+    },
+    {
+      name: "Ocean Blue",
+      primary: "#0EA5E9",
+      secondary: "#7a138aff",
+      accent: "#67E8F9",
+      gradient: "linear-gradient(135deg, #0EA5E9 0%, #10B981 100%)",
+      bgGradient: "linear-gradient(45deg, #0EA5E9 0%, #10B981 100%)",
+    },
+    {
+      name: "Sunset Orange",
+      primary: "#F97316",
+      secondary: "#FB923C",
+      accent: "#FDBA74",
+      gradient: "linear-gradient(135deg, #F97316 0%, #EF4444 100%)",
+      bgGradient: "linear-gradient(45deg, #F97316 0%, #EF4444 100%)",
+    },
+    {
+      name: "Neon Green",
+      primary: "#22C55E",
+      secondary: "#16A34A",
+      accent: "#4ADE80",
+      gradient: "linear-gradient(135deg, #22C55E 0%, #0EA5E9 100%)",
+      bgGradient: "linear-gradient(45deg, #22C55E 0%, #0EA5E9 100%)",
+    },
+  ];
+
+  const features = [
+    { icon: <Shield size={16} />, text: "Secure Authentication" },
+    { icon: <Zap size={16} />, text: "Lightning Fast" },
+    { icon: <User size={16} />, text: "User Friendly" },
+  ];
+
+  useEffect(() => {
+    const themeInterval = setInterval(() => {
+      setCurrentTheme((prev) => (prev + 1) % themes.length);
+      setAnimationKey((prev) => prev + 1);
+    }, 4000);
+
+    return () => clearInterval(themeInterval);
+  }, []);
+
+  const currentColors = themes[currentTheme];
+
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const name = e.target.name as keyof AuthFormData;
+    const value = e.target.value;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log('Login attempt:', formData);
+    console.log("Form submitted:", formData);
   };
 
   return (
-    <div className="min-vh-100" style={{
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
-    }}>
-      {/* Navigation */}
-      <nav className="navbar navbar-expand-lg navbar-dark bg-transparent">
-        <div className="container">
-          <a className="navbar-brand fw-bold fs-3" href="/">
-            <span style={{color: '#fff'}}>🚀 YourApp</span>
-          </a>
-          <a href="/" className="btn btn-outline-light rounded-pill px-4">
-            🏠 Home
-          </a>
-        </div>
-      </nav>
+    <div className="min-vh-100 bg-dark text-white position-relative overflow-hidden d-flex align-items-center">
+      <div
+        className="position-absolute w-100 h-100"
+        style={{ background: currentColors.bgGradient, opacity: 0.1, transition: "all 1s ease" }}
+      />
 
-      {/* Main Content */}
+      <div className="position-absolute w-100 h-100">
+        {[...Array(15)].map((_, i) => (
+          <div
+            key={`${animationKey}-${i}`}
+            className="position-absolute rounded-circle"
+            style={{
+              width: Math.random() * 6 + 2 + "px",
+              height: Math.random() * 6 + 2 + "px",
+              left: Math.random() * 100 + "%",
+              top: Math.random() * 100 + "%",
+              background: currentColors.primary,
+              opacity: Math.random() * 0.5 + 0.1,
+              animation: `float ${Math.random() * 3 + 2}s ease-in-out infinite alternate`,
+            }}
+          />
+        ))}
+      </div>
+
+      <div className="position-absolute top-0 start-0 w-100 h-100 d-none d-lg-block">
+        {features.map((feature, index) => (
+          <div
+            key={index}
+            className="position-absolute card bg-dark bg-opacity-50 border-0 p-2 d-flex flex-row align-items-center"
+            style={{
+              left: `${10 + index * 25}%`,
+              top: `${20 + index * 15}%`,
+              backdropFilter: "blur(10px)",
+              animation: `floatFeature ${3 + index}s ease-in-out infinite alternate`,
+              borderLeft: `3px solid ${currentColors.primary}`,
+              transition: "border-color 1s ease",
+            }}
+          >
+            <div className="me-2" style={{ color: currentColors.primary }}>
+              {feature.icon}
+            </div>
+            <small className="text-white">{feature.text}</small>
+          </div>
+        ))}
+      </div>
+
       <div className="container">
-        <div className="row justify-content-center align-items-center" style={{minHeight: '80vh'}}>
-          <div className="col-11 col-md-8 col-lg-6 col-xl-5">
-            
-            {/* Login Card */}
-            <div className="card border-0 shadow-lg" style={{
-              borderRadius: '20px',
-              background: 'rgba(255, 255, 255, 0.95)',
-              backdropFilter: 'blur(10px)'
-            }}>
-              <div className="card-body p-5">
-                
-                {/* Header */}
-                <div className="text-center mb-5">
-                  <div className="mb-3">
-                    <span style={{
-                      fontSize: '4rem',
-                      background: 'linear-gradient(135deg, #667eea, #764ba2)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      backgroundClip: 'text'
-                    }}>
-                      🔐
-                    </span>
-                  </div>
-                  <h2 className="fw-bold mb-2" style={{color: '#2c3e50'}}>
-                    Welcome Back!
-                  </h2>
-                  <p className="text-muted">Sign in to your account</p>
+        <div className="row justify-content-center">
+          <div className="col-lg-5 col-md-7 col-sm-9">
+            <div
+              className="card bg-dark bg-opacity-80 border-0 shadow-lg position-relative overflow-hidden"
+              style={{
+                backdropFilter: "blur(20px)",
+                borderTop: `3px solid ${currentColors.primary}`,
+                transition: "border-color 1s ease",
+              }}
+            >
+              <div className="card-header bg-transparent border-0 text-center pt-4">
+                <div className="mb-3">
+                  <Sparkles
+                    size={24}
+                    style={{
+                      color: currentColors.primary,
+                      animation: "pulse 2s infinite",
+                      transition: "color 1s ease",
+                    }}
+                  />
                 </div>
 
-                {/* Form */}
-                <div onSubmit={handleSubmit}>
-                  
-                  {/* Email Field */}
-                  <div className="mb-4">
-                    <label className="form-label fw-semibold" style={{color: '#495057'}}>
-                      Email Address
-                    </label>
-                    <div className="input-group">
-                      <span className="input-group-text border-end-0" style={{
-                        background: 'transparent',
-                        border: '2px solid #e9ecef',
-                        borderRadius: '15px 0 0 15px'
-                      }}>
-                        📧
-                      </span>
+                <h3
+                  className="mb-2 fw-bold"
+                  style={{
+                    background: currentColors.gradient,
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    transition: "all 1s ease",
+                  }}
+                >
+                  TS-Vite-BS
+                </h3>
+
+                <p className="text-muted small mb-0">
+                  {isLogin ? "Welcome back! Please sign in." : "Create your account to get started."}
+                </p>
+              </div>
+
+              <div className="card-body p-4">
+                <div className="d-flex mb-4 p-1 bg-secondary bg-opacity-20 rounded-pill">
+                  <button
+                    type="button"
+                    className={`btn btn-sm flex-fill py-2 rounded-pill border-0 ${isLogin ? "text-white" : "text-muted"}`}
+                    style={{ background: isLogin ? currentColors.gradient : "transparent", transition: "all 0.3s ease" }}
+                    onClick={() => setIsLogin(true)}
+                  >
+                    Sign In
+                  </button>
+                  <button
+                    type="button"
+                    className={`btn btn-sm flex-fill py-2 rounded-pill border-0 ${!isLogin ? "text-white" : "text-muted"}`}
+                    style={{ background: !isLogin ? currentColors.gradient : "transparent", transition: "all 0.3s ease" }}
+                    onClick={() => setIsLogin(false)}
+                  >
+                    Sign Up
+                  </button>
+                </div>
+
+                <form onSubmit={handleSubmit}>
+                  {!isLogin && (
+                    <div className="mb-3">
+                      <div className="position-relative">
+                        <User
+                          size={16}
+                          className="position-absolute top-50 start-0 translate-middle-y ms-3"
+                          style={{ color: activeInput === "name" ? currentColors.primary : "#6c757d", transition: "color 0.3s ease" }}
+                        />
+                        <input
+                          type="text"
+                          name="name"
+                          className="form-control bg-dark bg-opacity-50 border-0 text-white ps-5 py-3"
+                          placeholder="Full Name"
+                          value={formData.name}
+                          onChange={handleInputChange}
+                          onFocus={() => setActiveInput("name")}
+                          onBlur={() => setActiveInput("")}
+                          style={{
+                            borderBottom: `2px solid ${activeInput === "name" ? currentColors.primary : "#6c757d"}`,
+                            transition: "border-color 0.3s ease",
+                          }}
+                          required={!isLogin}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="mb-3">
+                    <div className="position-relative">
+                      <Mail
+                        size={16}
+                        className="position-absolute top-50 start-0 translate-middle-y ms-3"
+                        style={{ color: activeInput === "email" ? currentColors.primary : "#6c757d", transition: "color 0.3s ease" }}
+                      />
                       <input
                         type="email"
                         name="email"
-                        className="form-control border-start-0 ps-0"
-                        placeholder="Enter your email"
+                        className="form-control bg-dark bg-opacity-50 border-0 text-white ps-5 py-3"
+                        placeholder="Email Address"
                         value={formData.email}
                         onChange={handleInputChange}
+                        onFocus={() => setActiveInput("email")}
+                        onBlur={() => setActiveInput("")}
                         style={{
-                          border: '2px solid #e9ecef',
-                          borderRadius: '0 15px 15px 0',
-                          padding: '12px 15px',
-                          fontSize: '16px'
+                          borderBottom: `2px solid ${activeInput === "email" ? currentColors.primary : "#6c757d"}`,
+                          transition: "border-color 0.3s ease",
                         }}
                         required
                       />
                     </div>
                   </div>
 
-                  {/* Password Field */}
-                  <div className="mb-4">
-                    <label className="form-label fw-semibold" style={{color: '#495057'}}>
-                      Password
-                    </label>
-                    <div className="input-group">
-                      <span className="input-group-text border-end-0" style={{
-                        background: 'transparent',
-                        border: '2px solid #e9ecef',
-                        borderRadius: '15px 0 0 15px'
-                      }}>
-                        🔒
-                      </span>
+                  <div className="mb-3">
+                    <div className="position-relative">
+                      <Lock
+                        size={16}
+                        className="position-absolute top-50 start-0 translate-middle-y ms-3"
+                        style={{ color: activeInput === "password" ? currentColors.primary : "#6c757d", transition: "color 0.3s ease" }}
+                      />
                       <input
-                        type={showPassword ? 'text' : 'password'}
+                        type={showPassword ? "text" : "password"}
                         name="password"
-                        className="form-control border-start-0 border-end-0 ps-0"
-                        placeholder="Enter your password"
+                        className="form-control bg-dark bg-opacity-50 border-0 text-white ps-5 pe-5 py-3"
+                        placeholder="Password"
                         value={formData.password}
                         onChange={handleInputChange}
+                        onFocus={() => setActiveInput("password")}
+                        onBlur={() => setActiveInput("")}
                         style={{
-                          border: '2px solid #e9ecef',
-                          padding: '12px 15px',
-                          fontSize: '16px'
+                          borderBottom: `2px solid ${activeInput === "password" ? currentColors.primary : "#6c757d"}`,
+                          transition: "border-color 0.3s ease",
                         }}
                         required
                       />
                       <button
                         type="button"
-                        className="btn border-start-0"
-                        style={{
-                          border: '2px solid #e9ecef',
-                          borderRadius: '0 15px 15px 0',
-                          background: 'transparent'
-                        }}
-                        onClick={() => setShowPassword(!showPassword)}
+                        className="btn btn-link position-absolute top-50 end-0 translate-middle-y me-3 p-0 text-muted"
+                        onClick={() => setShowPassword((p) => !p)}
                       >
-                        {showPassword ? '👁️' : '🙈'}
+                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                       </button>
                     </div>
                   </div>
 
-                  {/* Remember Me & Forgot Password */}
-                  <div className="d-flex justify-content-between align-items-center mb-4">
-                    <div className="form-check">
-                      <input className="form-check-input" type="checkbox" id="rememberMe" />
-                      <label className="form-check-label text-muted" htmlFor="rememberMe">
-                        Remember me
-                      </label>
+                  {!isLogin && (
+                    <div className="mb-3">
+                      <div className="position-relative">
+                        <Lock
+                          size={16}
+                          className="position-absolute top-50 start-0 translate-middle-y ms-3"
+                          style={{
+                            color: activeInput === "confirmPassword" ? currentColors.primary : "#6c757d",
+                            transition: "color 0.3s ease",
+                          }}
+                        />
+                        <input
+                          type="password"
+                          name="confirmPassword"
+                          className="form-control bg-dark bg-opacity-50 border-0 text-white ps-5 py-3"
+                          placeholder="Confirm Password"
+                          value={formData.confirmPassword}
+                          onChange={handleInputChange}
+                          onFocus={() => setActiveInput("confirmPassword")}
+                          onBlur={() => setActiveInput("")}
+                          style={{
+                            borderBottom: `2px solid ${activeInput === "confirmPassword" ? currentColors.primary : "#6c757d"}`,
+                            transition: "border-color 0.3s ease",
+                          }}
+                          required={!isLogin}
+                        />
+                      </div>
                     </div>
-                    <a href="/forgot-password" className="text-decoration-none" style={{
-                      color: '#667eea',
-                      fontSize: '14px'
-                    }}>
-                      Forgot Password?
-                    </a>
-                  </div>
+                  )}
 
-                  {/* Login Button */}
                   <button
                     type="submit"
-                    className="btn w-100 py-3 fw-bold text-white position-relative overflow-hidden"
-                    style={{
-                      background: 'linear-gradient(135deg, #667eea, #764ba2)',
-                      border: 'none',
-                      borderRadius: '15px',
-                      fontSize: '16px',
-                      transition: 'all 0.3s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.transform = 'translateY(-2px)';
-                      e.target.style.boxShadow = '0 8px 25px rgba(102, 126, 234, 0.4)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.transform = 'translateY(0)';
-                      e.target.style.boxShadow = 'none';
-                    }}
+                    className="btn btn-lg w-100 py-3 mb-3 border-0 fw-bold d-flex align-items-center justify-content-center gap-2"
+                    style={{ background: currentColors.gradient, transition: "all 0.3s ease" }}
                   >
-                    🚀 Sign In
+                    {isLogin ? "Sign In" : "Create Account"}
+                    <ArrowRight size={16} />
                   </button>
 
-                  {/* Divider */}
-                  <div className="d-flex align-items-center my-4">
-                    <hr className="flex-grow-1" />
-                    <span className="px-3 text-muted small">OR</span>
-                    <hr className="flex-grow-1" />
-                  </div>
-
-                  {/* Social Login */}
-                  <div className="row g-2 mb-4">
-                    <div className="col-6">
-                      <button
-                        type="button"
-                        className="btn btn-outline-secondary w-100 py-2"
-                        style={{borderRadius: '12px'}}
-                      >
-                        🔵 Google
+                  <div className="text-center">
+                    <p className="text-muted small mb-3">Or continue with</p>
+                    <div className="d-flex gap-2">
+                      <button type="button" className="btn btn-outline-secondary btn-sm flex-fill py-2 d-flex align-items-center justify-content-center gap-2">
+                        <Github size={14} /> GitHub
                       </button>
-                    </div>
-                    <div className="col-6">
-                      <button
-                        type="button"
-                        className="btn btn-outline-secondary w-100 py-2"
-                        style={{borderRadius: '12px'}}
-                      >
-                        📘 Facebook
+                      <button type="button" className="btn btn-outline-secondary btn-sm flex-fill py-2 d-flex align-items-center justify-content-center gap-2">
+                        <Chrome size={14} /> Google
                       </button>
                     </div>
                   </div>
+                </form>
+              </div>
 
-                </div>
-
-                {/* Sign Up Link */}
-                <div className="text-center">
-                  <p className="mb-0 text-muted">
-                    Don't have an account?{' '}
-                    <a
-                      href="/signup"
-                      className="text-decoration-none fw-bold"
-                      style={{
-                        color: '#667eea',
-                        transition: 'all 0.3s ease'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.target.style.color = '#764ba2';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.color = '#667eea';
-                      }}
-                    >
-                      Create Account 🎉
-                    </a>
-                  </p>
-                </div>
-
+              <div className="card-footer bg-transparent border-0 text-center py-3">
+                <small className="text-muted">
+                  Theme: <span style={{ color: currentColors.primary }}>{currentColors.name}</span>
+                </small>
               </div>
             </div>
-
-            {/* Footer */}
-            <div className="text-center mt-4">
-              <p className="text-white-50 small">
-                © 2025 YourApp. Secure & Trusted Login
-              </p>
-            </div>
-
           </div>
         </div>
       </div>
+
+      <style>{`
+        @keyframes float { 0% { transform: translateY(0px); } 100% { transform: translateY(-10px); } }
+        @keyframes floatFeature { 0% { transform: translateY(0px) translateX(0px); } 100% { transform: translateY(-15px) translateX(5px); } }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .btn:hover { transform: translateY(-2px); transition: all 0.3s ease; }
+        .form-control:focus { box-shadow: none; background-color: rgba(255, 255, 255, 0.1) !important; }
+      `}</style>
     </div>
   );
-};
-
-export default Login;
+}

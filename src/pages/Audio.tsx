@@ -1,241 +1,262 @@
-import React, { useState, useRef, useEffect } from "react";
-import {
-  Container,
-  Row,
-  Col,
-  Card,
-  Button,
-  ButtonGroup,
-  ToggleButton,
-  ProgressBar,
-  ListGroup,
-} from "react-bootstrap";
-import {
-  FaPlay,
-  FaPause,
-  FaHeart,
-  FaVolumeUp,
-  FaDownload,
-  FaShareAlt,
-  FaTrash,
-} from "react-icons/fa";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Container, Row, Col, Card, Button, ProgressBar, Form, ListGroup, Badge } from "react-bootstrap";
+import { FaPlay, FaPause, FaPlus, FaTrash } from "react-icons/fa";
 
-const sampleTracks = [
-  {
-    title: "Lofi Chill Beats",
-    artist: "DJ Relax",
-    duration: 180,
-    cover: "https://via.placeholder.com/150/6610f2/ffffff?text=Lofi",
-    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-  },
-  {
-    title: "Electro Pop",
-    artist: "Nova",
-    duration: 210,
-    cover: "https://via.placeholder.com/150/20c997/ffffff?text=Electro",
-    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
-  },
-  {
-    title: "Jazz Vibes",
-    artist: "Smooth Sax",
-    duration: 240,
-    cover: "https://via.placeholder.com/150/ffc107/ffffff?text=Jazz",
-    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
-  },
-];
+type Track = {
+  title: string;
+  artist: string;
+  duration: number; // seconds
+  src: string;
+  cover?: string;
+};
 
-const AudioDashboard = () => {
-  const [theme, setTheme] = useState("light");
-  const [currentTrack, setCurrentTrack] = useState(null);
+const Audio = () => {
+  const tracks: Track[] = useMemo(
+    () => [
+      {
+        title: "Focus Beats",
+        artist: "TINITIATE Studio",
+        duration: 180,
+        src: "/audio/focus-beats.mp3",
+        cover: "https://via.placeholder.com/80",
+      },
+      {
+        title: "Calm Piano",
+        artist: "TINITIATE Studio",
+        duration: 210,
+        src: "/audio/calm-piano.mp3",
+        cover: "https://via.placeholder.com/80",
+      },
+      {
+        title: "Lo-fi Chill",
+        artist: "TINITIATE Studio",
+        duration: 240,
+        src: "/audio/lofi-chill.mp3",
+        cover: "https://via.placeholder.com/80",
+      },
+    ],
+    []
+  );
+
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [playlist, setPlaylist] = useState([]);
-  const [volume, setVolume] = useState(0.7);
-  const [progress, setProgress] = useState(0);
+  const [progress, setProgress] = useState(0); // seconds
+  const [volume, setVolume] = useState(0.8);
+  const [playlist, setPlaylist] = useState<Track[]>([]);
 
-  const audioRef = useRef(null);
+  // keep volume in sync
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.volume = volume;
+  }, [volume]);
 
+  // keep progress in sync + cleanup listener
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    audio.volume = volume;
+    const onTimeUpdate = () => setProgress(audio.currentTime);
+    const onEnded = () => setIsPlaying(false);
 
-    const updateProgress = () => {
-      setProgress(audio.currentTime);
-    };
+    audio.addEventListener("timeupdate", onTimeUpdate);
+    audio.addEventListener("ended", onEnded);
 
-    audio.addEventListener("timeupdate", updateProgress);
     return () => {
-      audio.removeEventListener("timeupdate", updateProgress);
+      audio.removeEventListener("timeupdate", onTimeUpdate);
+      audio.removeEventListener("ended", onEnded);
     };
-  }, [volume]);
+  }, [currentTrack]);
 
-  const handlePlay = (track) => {
-    setCurrentTrack(track);
-    setIsPlaying(true);
-    setProgress(0);
-  };
+  const playTrack = async (track: Track) => {
+    const audio = audioRef.current;
+    if (!audio) return;
 
-  useEffect(() => {
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.play();
-      } else {
-        audioRef.current.pause();
+    // if switching track
+    if (!currentTrack || currentTrack.src !== track.src) {
+      setCurrentTrack(track);
+      setProgress(0);
+
+      // set src and play
+      audio.src = track.src;
+      try {
+        await audio.play();
+        setIsPlaying(true);
+      } catch {
+        setIsPlaying(false);
+      }
+      return;
+    }
+
+    // same track toggle
+    if (isPlaying) {
+      audio.pause();
+      setIsPlaying(false);
+    } else {
+      try {
+        await audio.play();
+        setIsPlaying(true);
+      } catch {
+        setIsPlaying(false);
       }
     }
-  }, [isPlaying, currentTrack]);
-
-  const addToPlaylist = (track) => {
-    if (!playlist.find((t) => t.title === track.title)) {
-      setPlaylist([...playlist, track]);
-    }
   };
 
-  const removeFromPlaylist = (track) => {
-    setPlaylist(playlist.filter((t) => t.title !== track.title));
+  const seek = (value: number) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.currentTime = value;
+    setProgress(value);
   };
 
-  const themeClass = theme === "dark" ? "bg-dark text-light" : "bg-light text-dark";
+  const addToPlaylist = (track: Track) => {
+    setPlaylist((prev) => (prev.some((t) => t.src === track.src) ? prev : [...prev, track]));
+  };
+
+  const removeFromPlaylist = (track: Track) => {
+    setPlaylist((prev) => prev.filter((t) => t.src !== track.src));
+  };
+
+  const formatTime = (sec: number) => {
+    const s = Math.max(0, Math.floor(sec));
+    const m = Math.floor(s / 60);
+    const r = s % 60;
+    return `${m}:${String(r).padStart(2, "0")}`;
+  };
+
+  const duration = currentTrack?.duration ?? 0;
+  const percent = duration > 0 ? (progress / duration) * 100 : 0;
 
   return (
-    <div className={`position-relative ${themeClass}`} style={{ minHeight: "100vh", overflow: "hidden" }}>
-      {/* Waveform animation */}
-      <div className="waveform-bg"></div>
-
-      <Container className="py-4 position-relative" style={{ zIndex: 2 }}>
-        {/* Header */}
-        <div className="d-flex justify-content-between align-items-center mb-4">
-          <h2 className="fw-bold">🎧 Ultimate Audio Player</h2>
-          <Button
-            variant={theme === "dark" ? "light" : "dark"}
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          >
-            {theme === "dark" ? "☀ Light Mode" : "🌙 Dark Mode"}
-          </Button>
-        </div>
-
-        {/* Cards */}
-        <Row className="g-4">
-          {sampleTracks.map((track, idx) => (
-            <Col md={4} key={idx}>
-              <Card className={`shadow border-0 ${themeClass}`}>
-                <Card.Img variant="top" src={track.cover} />
-                <Card.Body className="text-center">
-                  <h5>{track.title}</h5>
-                  <p className="text-muted">{track.artist}</p>
-                  <div className="d-flex justify-content-around my-2">
-                    <Button
-                      variant={currentTrack?.title === track.title && isPlaying ? "danger" : "success"}
-                      onClick={() =>
-                        currentTrack?.title === track.title
-                          ? setIsPlaying(!isPlaying)
-                          : handlePlay(track)
-                      }
-                    >
-                      {currentTrack?.title === track.title && isPlaying ? <FaPause /> : <FaPlay />}
-                    </Button>
-                    <Button variant="outline-primary" onClick={() => addToPlaylist(track)}>
-                      ➕ Add
-                    </Button>
-                  </div>
-                  <div className="d-flex justify-content-around mt-2">
-                    <a href={track.src} download target="_blank" rel="noreferrer">
-                      <Button variant="outline-success"><FaDownload /></Button>
-                    </a>
-                    <Button variant="outline-warning" onClick={() => alert("Sharing: " + track.title)}>
-                      <FaShareAlt />
-                    </Button>
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
-          ))}
-        </Row>
-
-        {/* Playlist */}
-        {playlist.length > 0 && (
-          <div className={`mt-5 p-3 rounded ${theme === "dark" ? "bg-secondary" : "bg-white"} shadow`}>
-            <h5>📁 My Playlist</h5>
-            <ListGroup variant="flush">
-              {playlist.map((track, i) => (
-                <ListGroup.Item key={i} className={themeClass}>
-                  <div className="d-flex justify-content-between align-items-center">
-                    <span>{track.title}</span>
-                    <div>
-                      <Button size="sm" variant="outline-primary" onClick={() => handlePlay(track)}>
-                        ▶ Play
-                      </Button>{" "}
-                      <Button size="sm" variant="outline-danger" onClick={() => removeFromPlaylist(track)}>
-                        <FaTrash />
-                      </Button>
-                    </div>
-                  </div>
-                </ListGroup.Item>
-              ))}
-            </ListGroup>
-          </div>
-        )}
-
-        {/* Now Playing */}
-        {currentTrack && (
-          <div className={`mt-5 p-4 rounded shadow ${theme === "dark" ? "bg-secondary" : "bg-white"}`}>
-            <Row className="align-items-center">
-              <Col md={3}>
-                <strong>Now Playing:</strong>
-                <div>{currentTrack.title} - <small>{currentTrack.artist}</small></div>
-              </Col>
-              <Col md={6}>
-                <ProgressBar
-                  animated
-                  now={(progress / currentTrack.duration) * 100}
-                  label={`${Math.floor(progress)}s / ${currentTrack.duration}s`}
+    <Container className="py-4">
+      <Row className="g-3">
+        <Col md={7}>
+          <Card className="shadow-sm border-0">
+            <Card.Header className="bg-primary text-white fw-bold">🎵 Audio Player</Card.Header>
+            <Card.Body>
+              <div className="d-flex align-items-center gap-3 mb-3">
+                <img
+                  src={currentTrack?.cover || "https://via.placeholder.com/80"}
+                  alt="cover"
+                  width={80}
+                  height={80}
+                  style={{ borderRadius: 12, objectFit: "cover" }}
                 />
-              </Col>
-              <Col md={3} className="text-end">
-                <FaVolumeUp className="me-2" />
-                <input
-                  type="range"
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  value={volume}
-                  onChange={(e) => setVolume(Number(e.target.value))}
-                  style={{ width: "100px" }}
-                />
-              </Col>
-            </Row>
-            <audio ref={audioRef} src={currentTrack.src} />
-          </div>
-        )}
-      </Container>
+                <div>
+                  <div className="fw-bold">{currentTrack ? currentTrack.title : "Select a track"}</div>
+                  <div className="text-muted small">{currentTrack ? currentTrack.artist : "—"}</div>
+                  {currentTrack && <Badge bg={isPlaying ? "success" : "secondary"}>{isPlaying ? "Playing" : "Paused"}</Badge>}
+                </div>
+              </div>
 
-      {/* Waveform CSS */}
-      <style>{`
-        .waveform-bg {
-          position: absolute;
-          bottom: 0;
-          width: 100%;
-          height: 140px;
-          background: repeating-linear-gradient(
-            to right,
-            #0d6efd 0px,
-            #0d6efd 3px,
-            transparent 3px,
-            transparent 6px
-          );
-          animation: wave 1.2s linear infinite;
-          opacity: 0.05;
-          z-index: 0;
-        }
+              <div className="mb-2 d-flex justify-content-between small text-muted">
+                <span>{formatTime(progress)}</span>
+                <span>{formatTime(duration)}</span>
+              </div>
 
-        @keyframes wave {
-          from { background-position-x: 0; }
-          to { background-position-x: 60px; }
-        }
-      `}</style>
-    </div>
+              <ProgressBar now={percent} className="mb-2" />
+
+              <Form.Range
+                min={0}
+                max={duration || 0}
+                step={1}
+                value={Math.min(progress, duration)}
+                onChange={(e) => seek(Number(e.target.value))}
+                disabled={!currentTrack}
+              />
+
+              <div className="d-flex align-items-center justify-content-between mt-3">
+                <Button
+                  variant={isPlaying ? "danger" : "success"}
+                  onClick={() => currentTrack && playTrack(currentTrack)}
+                  disabled={!currentTrack}
+                >
+                  {isPlaying ? <FaPause className="me-2" /> : <FaPlay className="me-2" />}
+                  {isPlaying ? "Pause" : "Play"}
+                </Button>
+
+                <div className="d-flex align-items-center gap-2" style={{ width: 220 }}>
+                  <span className="small text-muted">🔊</span>
+                  <Form.Range
+                    min={0}
+                    max={1}
+                    step={0.01}
+                    value={volume}
+                    onChange={(e) => setVolume(Number(e.target.value))}
+                  />
+                  <span className="small text-muted">{Math.round(volume * 100)}%</span>
+                </div>
+              </div>
+
+              {/* Hidden audio element */}
+              <audio ref={audioRef} />
+            </Card.Body>
+          </Card>
+        </Col>
+
+        <Col md={5}>
+          <Card className="shadow-sm border-0 mb-3">
+            <Card.Header className="fw-bold">🎧 Tracks</Card.Header>
+            <Card.Body>
+              <ListGroup variant="flush">
+                {tracks.map((t) => {
+                  const active = currentTrack?.src === t.src;
+                  return (
+                    <ListGroup.Item key={t.src} className="d-flex align-items-center justify-content-between">
+                      <div>
+                        <div className="fw-semibold">{t.title}</div>
+                        <div className="text-muted small">
+                          {t.artist} • {formatTime(t.duration)}
+                        </div>
+                      </div>
+                      <div className="d-flex gap-2">
+                        <Button size="sm" variant={active && isPlaying ? "danger" : "success"} onClick={() => playTrack(t)}>
+                          {active && isPlaying ? <FaPause /> : <FaPlay />}
+                        </Button>
+                        <Button size="sm" variant="outline-primary" onClick={() => addToPlaylist(t)}>
+                          <FaPlus />
+                        </Button>
+                      </div>
+                    </ListGroup.Item>
+                  );
+                })}
+              </ListGroup>
+            </Card.Body>
+          </Card>
+
+          <Card className="shadow-sm border-0">
+            <Card.Header className="fw-bold">📃 Playlist</Card.Header>
+            <Card.Body>
+              {playlist.length === 0 ? (
+                <div className="text-muted">No items in playlist</div>
+              ) : (
+                <ListGroup>
+                  {playlist.map((t) => (
+                    <ListGroup.Item key={t.src} className="d-flex align-items-center justify-content-between">
+                      <div>
+                        <div className="fw-semibold">{t.title}</div>
+                        <div className="text-muted small">{t.artist}</div>
+                      </div>
+                      <div className="d-flex gap-2">
+                        <Button size="sm" variant="outline-success" onClick={() => playTrack(t)}>
+                          <FaPlay />
+                        </Button>
+                        <Button size="sm" variant="outline-danger" onClick={() => removeFromPlaylist(t)}>
+                          <FaTrash />
+                        </Button>
+                      </div>
+                    </ListGroup.Item>
+                  ))}
+                </ListGroup>
+              )}
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+    </Container>
   );
 };
 
-export default AudioDashboard;
+export default Audio;

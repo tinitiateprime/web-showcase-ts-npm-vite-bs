@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import { motion } from "framer-motion";
 import { FaLeaf, FaBrain, FaSmile, FaMoon, FaSun } from "react-icons/fa";
@@ -9,8 +9,8 @@ const features = [
   { icon: <FaSmile />, title: "UI Delight", desc: "Hover-friendly joyful animations." },
 ];
 
-const SplitAnimationPage = () => {
-  const [theme, setTheme] = useState("light");
+export default function SplitAnimationPage() {
+  const [theme, setTheme] = useState<"light" | "dark">("light");
 
   return (
     <div
@@ -57,18 +57,14 @@ const SplitAnimationPage = () => {
 
       <Container fluid>
         <Row className="align-items-center" style={{ position: "relative", zIndex: 1 }}>
-          {/* Left column with staggered features */}
+          {/* Left column */}
           <Col md={6}>
             <motion.div
               initial="hidden"
               animate="visible"
               variants={{
                 hidden: {},
-                visible: {
-                  transition: {
-                    staggerChildren: 0.25,
-                  },
-                },
+                visible: { transition: { staggerChildren: 0.25 } },
               }}
             >
               <motion.h1
@@ -79,6 +75,7 @@ const SplitAnimationPage = () => {
               >
                 ✨ Modern Animation UX
               </motion.h1>
+
               <motion.p
                 className="text-muted mb-4"
                 initial={{ opacity: 0 }}
@@ -128,7 +125,7 @@ const SplitAnimationPage = () => {
             </motion.div>
           </Col>
 
-          {/* Right animated image/preview */}
+          {/* Right */}
           <Col md={6} className="text-center mt-5 mt-md-0">
             <motion.div
               whileHover={{ scale: 1.05, rotate: 1 }}
@@ -148,9 +145,7 @@ const SplitAnimationPage = () => {
               <motion.div
                 animate={{ rotateY: [0, 180, 0] }}
                 transition={{ duration: 4, repeat: Infinity }}
-                style={{
-                  perspective: "1000px",
-                }}
+                style={{ perspective: "1000px" }}
               >
                 <img
                   src="https://source.unsplash.com/400x300/?technology,animation"
@@ -165,6 +160,4 @@ const SplitAnimationPage = () => {
       </Container>
     </div>
   );
-};
-
-export default SplitAnimationPage;
+}
