@@ -3,16 +3,23 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+
+  "engines": {
+    "node": ">=20"
+  },
+
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "typecheck": "tsc -b --noEmit",
     "lint": "eslint .",
     "preview": "vite preview"
   },
+
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.7.2",
     "bootstrap": "^5.3.7",
-    "chart.js": "^4.5.0",
+    "chart.js": "^4.5.1",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.5",
     "lucide-react": "^0.513.0",
@@ -20,7 +27,7 @@
     "react-bootstrap": "^2.10.10",
     "react-bootstrap-icons": "^1.11.6",
     "react-calendar": "^6.0.0",
-    "react-chartjs-2": "^5.3.0",
+    "react-chartjs-2": "^5.3.1",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^19.0.0",
@@ -33,6 +40,7 @@
     "tailwindcss": "^4.1.8",
     "wavesurfer.js": "^7.10.0"
   },
+
   "devDependencies": {
     "@eslint/js": "^9.19.0",
     "@types/react": "^19.0.8",

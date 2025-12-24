@@ -1,24 +1,40 @@
 import { useEffect, useState } from "react";
 
-const mockUser = {
+type UserProfile = {
+  name: string;
+  role: string;
+  email: string;
+  phone: string;
+  avatar: string;
+};
+
+const mockUser: UserProfile = {
   name: "Tinitiate",
   role: "Frontend Developer | React & UI/UX Enthusiast",
   email: "tinitiate@example.com",
   phone: "9876543210",
-  avatar: "https://source.unsplash.com/150x150/?profile"
+  avatar: "https://source.unsplash.com/150x150/?profile",
+};
+
+const safeParse = <T,>(value: string | null, fallback: T): T => {
+  try {
+    return value ? (JSON.parse(value) as T) : fallback;
+  } catch {
+    return fallback;
+  }
 };
 
 const ProfilePage = () => {
-  const [darkMode, setDarkMode] = useState(() => {
+  const [darkMode, setDarkMode] = useState<boolean>(() => {
     return localStorage.getItem("theme") === "dark";
   });
 
-  const [user, setUser] = useState(() => {
+  const [user, setUser] = useState<UserProfile>(() => {
     const saved = localStorage.getItem("userProfile");
-    return saved ? JSON.parse(saved) : mockUser;
+    return safeParse<UserProfile>(saved, mockUser);
   });
 
-  const [editMode, setEditMode] = useState(false);
+  const [editMode, setEditMode] = useState<boolean>(false);
 
   useEffect(() => {
     document.body.style.background = darkMode
@@ -26,6 +42,11 @@ const ProfilePage = () => {
       : "linear-gradient(135deg, #e0eafc, #cfdef3)";
     document.body.style.color = darkMode ? "#f4f4f4" : "#1a1a1a";
     localStorage.setItem("theme", darkMode ? "dark" : "light");
+
+    return () => {
+      document.body.style.background = "";
+      document.body.style.color = "";
+    };
   }, [darkMode]);
 
   const handleSave = () => {
@@ -132,6 +153,7 @@ const ProfilePage = () => {
 
       <div className="profile-card">
         <img src={user.avatar} alt="Profile" className="profile-img" />
+
         {!editMode ? (
           <>
             <h2>{user.name}</h2>
@@ -140,10 +162,8 @@ const ProfilePage = () => {
               📧 {user.email} <br />
               📞 {user.phone}
             </p>
-            <button
-              className="toggle-btn"
-              onClick={() => setEditMode(true)}
-            >
+
+            <button className="toggle-btn" onClick={() => setEditMode(true)}>
               ✏️ Edit Profile
             </button>
           </>
@@ -152,41 +172,55 @@ const ProfilePage = () => {
             <input
               type="text"
               value={user.name}
-              onChange={(e) =>
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setUser((prev) => ({ ...prev, name: e.target.value }))
               }
               placeholder="Name"
             />
+
             <input
               type="text"
               value={user.role}
-              onChange={(e) =>
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setUser((prev) => ({ ...prev, role: e.target.value }))
               }
               placeholder="Role"
             />
+
             <input
               type="email"
               value={user.email}
-              onChange={(e) =>
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setUser((prev) => ({ ...prev, email: e.target.value }))
               }
               placeholder="Email"
             />
+
             <input
               type="text"
               value={user.phone}
-              onChange={(e) =>
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setUser((prev) => ({ ...prev, phone: e.target.value }))
               }
               placeholder="Phone"
             />
+
+            <input
+              type="text"
+              value={user.avatar}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setUser((prev) => ({ ...prev, avatar: e.target.value }))
+              }
+              placeholder="Avatar URL"
+            />
+
             <button className="save-btn" onClick={handleSave}>
               ✅ Save Changes
             </button>
           </div>
         )}
-        <button className="toggle-btn" onClick={() => setDarkMode(!darkMode)}>
+
+        <button className="toggle-btn" onClick={() => setDarkMode((d) => !d)}>
           {darkMode ? "☀️ Light Mode" : "🌙 Dark Mode"}
         </button>
       </div>
@@ -194,7 +228,7 @@ const ProfilePage = () => {
   );
 };
 
-const styles = {
+const styles: Record<string, React.CSSProperties> = {
   container: {
     minHeight: "100vh",
     display: "flex",

@@ -12,12 +12,13 @@ const OnlineEditor = () => {
       <h2 className="text-info mb-4">
         <FaEdit className="me-2" /> Online Editor
       </h2>
+
       <div className="bg-light p-4 rounded shadow">
         <textarea
           className="form-control"
-          rows="8"
+          rows={8}   // ✅ must be number
           placeholder="Start typing here..."
-        ></textarea>
+        />
       </div>
     </motion.div>
   );

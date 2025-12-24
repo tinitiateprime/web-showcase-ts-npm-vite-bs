@@ -1,44 +1,52 @@
 import { useState } from "react";
-import { Line, Doughnut } from "react-chartjs-2";
-import { FaFileDownload, FaEye, FaFileAlt } from "react-icons/fa";
-import "bootstrap/dist/css/bootstrap.min.css";
+import { Line, Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
-  PointElement,
+  BarElement,
   LineElement,
-  ArcElement,
+  PointElement,
+  Tooltip,
+  Legend,
+  Title,
+} from "chart.js";
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  PointElement,
   Tooltip,
   Legend,
   Title
-} from "chart.js";
+);
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Tooltip, Legend, Title);
-
-const Reports = () => {
-  const [hoverCard, setHoverCard] = useState(null);
+const DashboardAnalytics = () => {
+  // ✅ FIX: type hover correctly
+  const [hover, setHover] = useState<number | null>(null);
 
   const lineData = {
     labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
     datasets: [
       {
-        label: "Conversions",
-        data: [120, 150, 180, 160, 200, 250],
-        borderColor: "#00ffff",
-        backgroundColor: "rgba(0,255,255,0.1)",
+        label: "User Growth",
+        data: [300, 450, 500, 650, 700, 850],
+        borderColor: "#0d6efd",
+        backgroundColor: "rgba(13,110,253,0.1)",
         tension: 0.4,
       },
     ],
   };
 
-  const donutData = {
-    labels: ["Returning", "New"],
+  const barData = {
+    labels: ["Returning", "New", "Lost"],
     datasets: [
       {
-        label: "Customer Retention",
-        data: [65, 35],
-        backgroundColor: ["#0d6efd", "#6610f2"],
+        label: "Retention",
+        data: [60, 30, 10],
+        backgroundColor: ["#6610f2", "#198754", "#dc3545"],
       },
     ],
   };
@@ -48,11 +56,11 @@ const Reports = () => {
       className="container-fluid py-4"
       style={{
         background: "linear-gradient(135deg, #111 20%, #222 80%)",
-        color: "white",
         minHeight: "100vh",
+        color: "white",
       }}
     >
-      {/* HEADER */}
+      {/* Header */}
       <div
         className="p-4 mb-4 rounded"
         style={{
@@ -60,56 +68,48 @@ const Reports = () => {
           backdropFilter: "blur(12px)",
           border: "2px solid rgba(255,255,255,0.2)",
           boxShadow: "0 0 20px rgba(0,255,255,0.3)",
+          textAlign: "center",
         }}
       >
-        <h2 style={{ fontWeight: 700, letterSpacing: 1 }}>📊 Reports Dashboard</h2>
-        <p className="mb-0">Unique visual analytics for conversions & retention</p>
+        <h2 style={{ fontWeight: 700, letterSpacing: 1 }}>📈 Analytics Dashboard</h2>
+        <p style={{ opacity: 0.85 }}>Visualize user growth, conversions & retention trends</p>
       </div>
 
-      {/* CARDS */}
-      <div className="row g-4">
+      {/* Cards */}
+      <div className="row g-4 mb-4">
         {[
-          { title: "Monthly Overview", desc: "Detailed monthly data report" },
-          { title: "Conversion Rate", desc: "Trends and patterns" },
-          { title: "Retention Analysis", desc: "Returning customers data" },
-        ].map((card, i) => (
-          <div
-            key={i}
-            className="col-md-4"
-            onMouseEnter={() => setHoverCard(i)}
-            onMouseLeave={() => setHoverCard(null)}
-          >
+          { name: "Total Users", stat: 1250, color: "#0d6efd" },
+          { name: "Conversion Rate", stat: "5.3%", color: "#198754" },
+          { name: "Retention Rate", stat: "68%", color: "#6610f2" },
+        ].map((item, i) => (
+          <div className="col-md-4" key={i}>
             <div
-              className="p-4 rounded"
+              onMouseEnter={() => setHover(i)}
+              onMouseLeave={() => setHover(null)}
               style={{
                 background: "rgba(255,255,255,0.05)",
-                border: hoverCard === i ? "2px solid #0d6efd" : "2px solid rgba(255,255,255,0.1)",
-                boxShadow: hoverCard === i
-                  ? "0 0 20px rgba(0,123,255,0.5)"
-                  : "0 4px 15px rgba(0,0,0,0.3)",
-                transition: "all 0.3s ease",
                 backdropFilter: "blur(10px)",
-                cursor: "pointer"
+                border:
+                  hover === i ? `2px solid ${item.color}` : "2px solid rgba(255,255,255,0.1)",
+                borderRadius: 16,
+                padding: 24,
+                boxShadow:
+                  hover === i ? `0 0 20px ${item.color}` : "0 4px 12px rgba(0,0,0,0.4)",
+                transition: "all 0.3s ease",
+                cursor: "pointer",
               }}
             >
-              <h5 className="mb-2" style={{ color: "#00ffff" }}>{card.title}</h5>
-              <p style={{ opacity: 0.85 }}>{card.desc}</p>
-              <div className="d-flex justify-content-between mt-3">
-                <button className="btn btn-outline-info btn-sm">
-                  <FaEye className="me-1" /> View
-                </button>
-                <button className="btn btn-outline-success btn-sm">
-                  <FaFileDownload className="me-1" /> Export
-                </button>
-              </div>
+              <h5 style={{ color: item.color }}>{item.name}</h5>
+              <h2>{item.stat}</h2>
+              <small className="text-light">as of today</small>
             </div>
           </div>
         ))}
       </div>
 
-      {/* CHARTS */}
-      <div className="row g-4 mt-4">
-        <div className="col-md-8">
+      {/* Charts */}
+      <div className="row g-4">
+        <div className="col-lg-8">
           <div
             className="p-4 rounded"
             style={{
@@ -119,11 +119,12 @@ const Reports = () => {
               boxShadow: "0 0 15px rgba(0,255,255,0.2)",
             }}
           >
-            <h5 style={{ marginBottom: 16, color: "#0d6efd" }}>Conversion Trends</h5>
+            <h5 style={{ marginBottom: 16, color: "#0d6efd" }}>User Growth Over Time</h5>
             <Line data={lineData} />
           </div>
         </div>
-        <div className="col-md-4">
+
+        <div className="col-lg-4">
           <div
             className="p-4 rounded"
             style={{
@@ -134,17 +135,17 @@ const Reports = () => {
             }}
           >
             <h5 style={{ marginBottom: 16, color: "#6610f2" }}>Customer Retention</h5>
-            <Doughnut data={donutData} />
+            <Bar data={barData} />
           </div>
         </div>
       </div>
 
-      {/* FOOTER */}
+      {/* Footer */}
       <div className="mt-5 text-center text-muted">
-        <small>🚀 Generated insights as of {new Date().toLocaleDateString()}</small>
+        <small>🚀 Analytics generated on {new Date().toLocaleDateString()}</small>
       </div>
     </div>
   );
 };
 
-export default Reports;
+export default DashboardAnalytics;

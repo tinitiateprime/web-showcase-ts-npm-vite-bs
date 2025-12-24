@@ -3,6 +3,7 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import LeftSidebar from "./components/LeftSidebar";
 import RightSidebar from "./components/RightSidebar";
+
 import Home from "./pages/Home";
 import Home1 from "./pages/Home1";
 import Home2 from "./pages/Home2";
@@ -16,11 +17,18 @@ import Catalog from "./pages/Catalog";
 import Comparison from "./pages/Comparison";
 import Comparison1 from "./pages/Comparison1";
 import Comparison2 from "./pages/Comparison2";
-import ForgotPassword from "./pages/Forgotpassword";
+
+// ⚠️ IMPORTANT: match the filename casing exactly on disk
+// If your file is src/pages/ForgotPassword.tsx then import must be:
+import ForgotPassword from "./pages/ForgotPassword";
+
 import Profile from "./pages/Profile";
 import EditProfile from "./pages/EditProfile";
 import Dashboard from "./pages/Dashboard";
+
+// ✅ Default import (because DashboardAnalytics.tsx has export default)
 import DashboardAnalytics from "./pages/DashboardAnalytics";
+
 import DashboardReports from "./pages/DashboardReports";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -45,6 +53,7 @@ const App = () => {
   return (
     <div className="d-flex flex-column min-vh-100">
       <Header />
+
       <div className="d-flex flex-grow-1" style={{ minHeight: "calc(100vh - 120px)" }}>
         {/* Left Sidebar */}
         <div style={{ width: "200px" }}>
@@ -112,9 +121,11 @@ const App = () => {
           <RightSidebar />
         </div>
       </div>
+
       <Footer />
     </div>
   );
 };
 
 export default App;
+ 

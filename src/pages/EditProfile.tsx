@@ -1,19 +1,33 @@
-import { useState, useEffect } from "react";
-import { FaUser, FaEnvelope, FaPhone, FaBriefcase } from "react-icons/fa";
+import { useEffect, useState } from "react";
+
+type UserProfile = {
+  name: string;
+  role: string;
+  email: string;
+  phone: string;
+  avatar: string;
+};
+
+const DEFAULT_USER: UserProfile = {
+  name: "Tinitiate",
+  role: "Frontend Developer",
+  email: "tinitiate@example.com",
+  phone: "9876543210",
+  avatar: "https://source.unsplash.com/150x150/?portrait",
+};
+
+const safeParse = <T,>(value: string | null, fallback: T): T => {
+  try {
+    return value ? (JSON.parse(value) as T) : fallback;
+  } catch {
+    return fallback;
+  }
+};
 
 const EditProfilePage = () => {
-  const [user, setUser] = useState(() => {
-    const stored = localStorage.getItem("userProfile");
-    return stored
-      ? JSON.parse(stored)
-      : {
-          name: "Tinitiate",
-          role: "Frontend Developer",
-          email: "tinitiate@example.com",
-          phone: "9876543210",
-          avatar: "https://source.unsplash.com/150x150/?portrait"
-        };
-  });
+  const [user, setUser] = useState<UserProfile>(() =>
+    safeParse<UserProfile>(localStorage.getItem("userProfile"), DEFAULT_USER)
+  );
 
   const handleSave = () => {
     localStorage.setItem("userProfile", JSON.stringify(user));
@@ -47,41 +61,22 @@ const EditProfilePage = () => {
             align-items: flex-start;
           }
         }
-        .profile-preview {
-          flex: 1;
-          text-align: center;
-          margin-bottom: 2rem;
-        }
+        .profile-preview { flex: 1; text-align: center; margin-bottom: 2rem; }
         .profile-preview img {
-          width: 150px;
-          height: 150px;
-          border-radius: 50%;
-          border: 4px solid #007bff;
-          margin-bottom: 1rem;
+          width: 150px; height: 150px; border-radius: 50%;
+          border: 4px solid #007bff; margin-bottom: 1rem; object-fit: cover;
         }
-        .profile-form {
-          flex: 2;
-          margin-left: 2rem;
-        }
+        .profile-form { flex: 2; margin-left: 2rem; }
+        @media(max-width: 767px){ .profile-form { margin-left: 0; } }
         .profile-form input {
-          width: 100%;
-          padding: 0.75rem;
-          margin-bottom: 1rem;
-          border-radius: 12px;
-          border: 1px solid #ddd;
+          width: 100%; padding: 0.75rem; margin-bottom: 1rem;
+          border-radius: 12px; border: 1px solid #ddd;
         }
         .save-btn {
-          background: #007bff;
-          color: #fff;
-          padding: 0.75rem 1.5rem;
-          border: none;
-          border-radius: 12px;
-          cursor: pointer;
-          font-weight: 600;
+          background: #007bff; color: #fff; padding: 0.75rem 1.5rem;
+          border: none; border-radius: 12px; cursor: pointer; font-weight: 600;
         }
-        .save-btn:hover {
-          background: #0056b3;
-        }
+        .save-btn:hover { background: #0056b3; }
         @keyframes fadeIn {
           from {opacity: 0; transform: translateY(20px);}
           to {opacity: 1; transform: translateY(0);}
@@ -94,8 +89,10 @@ const EditProfilePage = () => {
           <h3>{user.name}</h3>
           <p>{user.role}</p>
         </div>
+
         <div className="profile-form">
           <h2 style={{ marginBottom: "1rem" }}>Edit Profile</h2>
+
           <input
             type="text"
             placeholder="Name"
@@ -126,14 +123,17 @@ const EditProfilePage = () => {
             value={user.avatar}
             onChange={(e) => setUser({ ...user, avatar: e.target.value })}
           />
-          <button className="save-btn" onClick={handleSave}>Save Changes</button>
+
+          <button className="save-btn" onClick={handleSave}>
+            Save Changes
+          </button>
         </div>
       </div>
     </div>
   );
 };
 
-const styles = {
+const styles: Record<string, React.CSSProperties> = {
   container: {
     minHeight: "100vh",
     display: "flex",
