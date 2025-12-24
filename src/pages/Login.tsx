@@ -36,6 +36,7 @@ export default function LoginPage() {
   const [isLogin, setIsLogin] = useState<boolean>(true);
   const [activeInput, setActiveInput] = useState<keyof AuthFormData | "">("");
 
+  
   const [formData, setFormData] = useState<AuthFormData>({
     email: "",
     password: "",
