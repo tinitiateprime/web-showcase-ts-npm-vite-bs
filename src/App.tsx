@@ -19,7 +19,6 @@ import Comparison1 from "./pages/Comparison1";
 import Comparison2 from "./pages/Comparison2";
 
 // ✅ IMPORTANT: matches your actual file name exactly (case-sensitive on Netlify)
-import ForgotPassword from "./pages/ForgotPassword";
 
 import Profile from "./pages/Profile";
 import EditProfile from "./pages/EditProfile";
@@ -93,7 +92,7 @@ const App = () => {
             {/* auth */}
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
-            <Route path="/forgotpassword" element={<ForgotPassword />} />
+          
 
             {/* others */}
             <Route path="/contact" element={<Contact />} />
